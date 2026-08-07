@@ -1,89 +1,36 @@
-import os, sys
+from core.sorter import sort_files
+from core.logger import save_log
+from core.undo import undo 
 import argparse
-import shutil
-import datetime
-
-folder = "/home/mahmoud/Github/Personal/automated-file-sorter/test_folder/"
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--path", required = True)
+parser.add_argument("--mode", choices = ["ext", "date", "all"], required = True)
 
-parser.add_argument("--mode", choices = ["ext", "date", "both"], required = True)
+parser.add_argument("--dry_run", action = "store_true")
 
-parser.add_argument("--dry-run", action = "store_true")
+parser.add_argument("--verbose", action = "store_true")
 
 args = parser.parse_args()
 
-def list_files():
-    for i, file in enumerate(files):
-        print(f"{i}. {file}")
-        
-def file_definer(file):
-    file_name = os.path.splitext(file)[0]
-    file_ext = os.path.splitext(file)[1]
-    print(file_ext)
+group = parser.add_mutually_exclusive_group(required = True)
 
-def folder_generator(file):
-    if not os.path.isfile(os.path.join(folder, file)):
+group.add_argument("--undo", help="Undo using log file")
+group.add_argument("--path", help="Path to sort")
+def main():
+    if args.undo:
+        undo(args.undo)
         return
 
-    file_ext = os.path.splitext(file)[1]
-    file_name = file_ext[1:] #Removes the dot in ".txt"
-    full_path = os.path.join(folder, file_name)
-    folder_created = os.makedirs(full_path, exist_ok = True)
-    source = os.path.join(folder, file)
-    destination = os.path.join(full_path, file)
-    move_file(source, destination, file, folder_name, file_name)
-
-def folder_generator_time(file):
-    print("Checking:", file)
-    if not os.path.isfile(os.path.join(folder, file)):
-       return
-    time_stamp = os.path.getmtime(os.path.join(folder, file))
-    date = datetime.datetime.fromtimestamp(time_stamp)
-    folder_name = f"{date.year}-0{date.month:02d}"
-    full_path = os.path.join(folder, folder_name)
-    folder_created = os.makedirs(full_path, exist_ok = True)
-    source = os.path.join(folder, file)
-    destination = os.path.join(folder, folder_name, file)
-    move_file(source, destination, file, folder_name, file_name)
-
-def folder_generator_all(file):
-    if not os.path.isfile(os.path.join(folder, file)):
-       return
-    time_stamp = os.path.getmtime(os.path.join(folder, file))
-    date = datetime.datetime.fromtimestamp(time_stamp)
-    folder_name = f"{date.year}-0{date.month:02d}"
-    file_ext = os.path.splitext(file)[1]
-    file_name = file_ext[1:]
-    date_folder = folder_name
-    full_path = os.path.join(folder, file_name, date_folder)
-    ext_folder = os.makedirs(full_path, exist_ok = True)
-    source = os.path.join(folder, file)
-    destination = os.path.join(full_path, file)
-    move_file(source, destination, file, folder_name, file_name)
+    moves = sort_files(
+            args.path, 
+            args.mode, 
+            args.dry_run, 
+            args.verbose
+        )    
     
-def move_file(source, destination, file, folder_name, file_name):
-    if args.dry_run:
-        print(f"[DRY RUN] {file} -> {file_name}/{folder_name}\n")
-    else:
-        shutil.move(source, destination)
-        print(f"Moved {file} -> {folder_name}/{file_name}")
-
-def main():
-    
-    if args.mode == "ext":
-         for file in os.listdir(folder):
-            folder_generator(file)
-
-    elif args.mode == "date":
-        for file in os.listdir(folder):
-            folder_generator_time(file)
-
-    elif args.mode == "both":
-        for file in os.listdir(folder):
-            folder_generator_all(file)
+    if not args.dry_run and moves:
+        save_log(moves)
 
 if __name__ == "__main__":
     main()
