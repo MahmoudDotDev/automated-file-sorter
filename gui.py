@@ -110,7 +110,7 @@ class App:
         thread.start()
 
     def run_sorting(self):
-        moves, count = sort_files(
+        moves, created_folders, count = sort_files(
                 self.path_var.get(),
                 self.mode_var.get(),
                 self.dry_var.get(),
@@ -120,7 +120,7 @@ class App:
             )
         
         if moves:
-            save_log(moves)
+            save_log(moves, created_folders)
 
         self.root.after(0, self.finish_sorting)
     

@@ -11,18 +11,19 @@ parser.add_argument("--dry_run", action = "store_true", help = "Shows what the o
 
 parser.add_argument("--verbose", action = "store_true", help = "Gives more detailed logs")
 
-args = parser.parse_args()
-
 group = parser.add_mutually_exclusive_group(required = True)
 
 group.add_argument("--undo", help="Undo using log file")
 group.add_argument("--path", help="Path to sort")
+
+args = parser.parse_args()
+
 def main():
     if args.undo:
         undo(args.undo)
         return
 
-    moves = sort_files(
+    moves, created_folders, count= sort_files(
             args.path, 
             args.mode, 
             args.dry_run, 
@@ -30,7 +31,7 @@ def main():
         )    
     
     if not args.dry_run and moves:
-        save_log(moves)
+        save_log(moves, created_folders)
 
 if __name__ == "__main__":
     main()

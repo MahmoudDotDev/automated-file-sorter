@@ -1,8 +1,13 @@
 import json
 
-def save_log(moves, log_file="log.json"):
+def save_log(moves, created_folders, log_file="log.json"):
+    log_data = {
+        "moves": moves,
+        "created_folders": created_folders 
+    } 
+
     with open(log_file, "w") as f:
-        json.dump(moves, f, indent = 4)
+        json.dump(log_data, f, indent = 4)
 
 def load_log(log_file="log.json"):
     with open(log_file, "r") as f:
