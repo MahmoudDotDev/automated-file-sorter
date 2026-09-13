@@ -5,11 +5,11 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--mode", choices = ["ext", "date", "all"], required = True)
+parser.add_argument("--mode", choices = ["ext", "date", "all"], required = True, help = "Gives the option to choose by what criteria are the file gonna be sorted")
 
-parser.add_argument("--dry_run", action = "store_true")
+parser.add_argument("--dry_run", action = "store_true", help = "Shows what the output would be without running the program")
 
-parser.add_argument("--verbose", action = "store_true")
+parser.add_argument("--verbose", action = "store_true", help = "Gives more detailed logs")
 
 args = parser.parse_args()
 
