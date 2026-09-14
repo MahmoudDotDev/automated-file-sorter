@@ -1,7 +1,7 @@
 
 # Automated File Sorter
 
-A simple file sorter for messy directories. Saves time and lives. Sorted by accident? Don't worry — you can undo it!
+A simple file sorter for messy directories. Saves time and lives. Sorted by accident? Don't worry, you can undo it!
 
 Automatically organize files by **extension** or **date**, with an easy-to-use graphical interface.
 
