@@ -4,6 +4,7 @@ import datetime
 
 def sort_files(folder, mode, dry, verbose, logger=print, progress_callback=None):
     moves = []
+    created_folders = []  
     files = os.listdir(folder)
     total = len([f for f in files if os.path.isfile(os.path.join(folder, f))])
     count = 0
@@ -30,47 +31,59 @@ def sort_files(folder, mode, dry, verbose, logger=print, progress_callback=None)
                 progress_callback(count, total)
             continue  
         
-        success, final_destination = move_file(source, destination, file, folder_name, file_name, dry, verbose, logger)  
+        success, final_destination, new_folders = move_file(source, destination, file, folder_name, file_name, dry, verbose, logger)  
 
         if success and not dry:
            moves.append({
                "source": source,
                "destination": final_destination 
                })
-  
+            
+           if new_folders:
+              created_folders.extend(new_folders)
+
         count += 1  
         if progress_callback:
             progress_callback(count, total)
 
-    return moves, count 
+    return moves, created_folders, count 
 
 def move_file(source, destination, file, folder_name, file_name, dry, verbose, logger):
     
     original_destination = destination 
     destination = get_unique_name(destination)
-    
+     
     if verbose and destination != original_destination:
         logger(f"Renamed : {os.path.basename(destination)}")
+    
     if dry:
         logger(f"[DRY RUN] {file} -> {os.path.basename(destination)}")
-        return True, destination
+        return True, destination, []
+    
     try:
-
         dir_path = os.path.dirname(destination)
+        
+        created_folders = []
+        current_path = dir_path
+
+        while not os.path.exists(current_path):
+            created_folders.append(current_path)
+            current_path = os.path.dirname(current_path)
+
+        created_folders.reverse()
 
         if verbose:
             logger(f"Creating directory: {dir_path}")
-
 
         os.makedirs(dir_path, exist_ok=True) 
         shutil.move(source, destination)
         
         logger(f"Moved {file} -> {os.path.basename(destination)}\n")
-        return True, destination  
+        return True, destination, created_folders
     
     except Exception as e:
         logger(f"Error moving {file} : {e}")
-        return False, None
+        return False, None, []
 
 def get_unique_name(destination):
     base, ext = os.path.splitext(destination)
